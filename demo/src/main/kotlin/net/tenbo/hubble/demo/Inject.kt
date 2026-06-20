@@ -7,6 +7,7 @@ import net.tenbo.hubble.core.message.ChatMessage
 import net.tenbo.hubble.core.message.EnvelopeCodec
 import net.tenbo.hubble.core.message.Messaging
 import net.tenbo.hubble.core.message.VoiceMessage
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Base64

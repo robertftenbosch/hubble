@@ -179,6 +179,7 @@ class HubbleClient(private val scope: CoroutineScope) {
                         val m = byTag[env.senderTag] ?: return@runCatching
                         when (val incoming = messaging.open(env, m.toFriendRecord())) {
                             is Incoming.Chat -> appendLine(m.hubbleId, ChatLine(false, incoming.message.text, incoming.message.sentAtMs))
+                            is Incoming.Voice -> appendLine(m.hubbleId, ChatLine(false, "[Voice message]", incoming.message.sentAtMs))
                             is Incoming.Typing -> { typingFrom = m.hubbleId; typingExpiry = System.currentTimeMillis() + 6_000 }
                             is Incoming.Post -> {} // posts aren't shown in the desktop companion
                         }
