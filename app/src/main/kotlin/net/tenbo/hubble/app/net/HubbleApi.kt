@@ -1,6 +1,7 @@
 package net.tenbo.hubble.app.net
 
 import android.util.Base64
+import net.tenbo.hubble.app.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.OutputStream
@@ -11,10 +12,11 @@ import java.net.URL
  * Thin HTTP client for the Hubble server (heatmap + relay). Uses HttpURLConnection
  * (no extra deps). All calls are blocking and must run off the main thread.
  *
- * [baseUrl] defaults to the adb-reverse loopback used during on-device dev; point it
- * at the real server in production. The relay only ever sees opaque base64 envelopes.
+ * [baseUrl] defaults to `BuildConfig.HUBBLE_SERVER`, which is set at build time from
+ * the `-PhubbleServer=...` Gradle property (see :app build.gradle.kts). The relay
+ * only ever sees opaque base64 envelopes.
  */
-class HubbleApi(private val baseUrl: String = "http://127.0.0.1:4000") {
+class HubbleApi(private val baseUrl: String = BuildConfig.HUBBLE_SERVER) {
 
     /** Deposit an opaque encrypted envelope into a recipient's mailbox. */
     fun deposit(mailboxId: String, envelope: ByteArray) {

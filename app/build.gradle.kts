@@ -18,6 +18,14 @@ android {
         // Auto-derived from git in root build.gradle.kts.
         versionCode = rootProject.extra["versionCode"] as Int
         versionName = rootProject.extra["versionSemver"] as String
+        // Where the app posts envelopes / pulls matches. Defaults to the adb-reverse
+        // loopback so on-device dev "just works"; override at build time for a LAN
+        // test box or production host:
+        //   ./gradlew :app:assembleDebug -PhubbleServer=http://192.168.2.8:4000
+        //   ./gradlew :app:assembleRelease -PhubbleServer=https://hubble.tenbo.app
+        val hubbleServer = (project.findProperty("hubbleServer") as String?)
+            ?: "http://127.0.0.1:4000"
+        buildConfigField("String", "HUBBLE_SERVER", "\"$hubbleServer\"")
     }
 
     buildFeatures { compose = true; buildConfig = true }
