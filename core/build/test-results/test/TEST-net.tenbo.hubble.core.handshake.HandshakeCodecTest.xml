@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="net.tenbo.hubble.core.handshake.HandshakeCodecTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-06-19T11:27:21" hostname="dev-one" time="0.033">
-  <properties/>
-  <testcase name="confirm round-trips through encode-decode()" classname="net.tenbo.hubble.core.handshake.HandshakeCodecTest" time="0.016"/>
-  <testcase name="hello round-trips through encode-decode()" classname="net.tenbo.hubble.core.handshake.HandshakeCodecTest" time="0.005"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

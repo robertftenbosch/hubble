@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="net.tenbo.hubble.core.handshake.HandshakeTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-06-19T11:27:21" hostname="dev-one" time="0.744">
-  <properties/>
-  <testcase name="two peers derive the same root key and matching SAS()" classname="net.tenbo.hubble.core.handshake.HandshakeTest" time="0.675"/>
-  <testcase name="a tampered confirm signature aborts the handshake()" classname="net.tenbo.hubble.core.handshake.HandshakeTest" time="0.065"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

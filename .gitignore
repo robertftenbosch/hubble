@@ -1,10 +1,28 @@
-/_build
-/cover
-/deps
-/doc
-/.fetch
-erl_crash.dump
+# Gradle / Kotlin / JVM
+.gradle/
+.kotlin/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+local.properties
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Elixir / server
+server/_build/
+server/cover/
+server/deps/
+server/doc/
+server/.fetch
+server/erl_crash.dump
+server/config/*.secret.exs
 *.ez
 *.beam
-/config/*.secret.exs
 .elixir_ls/
+
+# OS
+.DS_Store
+Thumbs.db

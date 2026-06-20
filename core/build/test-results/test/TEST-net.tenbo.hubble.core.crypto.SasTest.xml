@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="net.tenbo.hubble.core.crypto.SasTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-06-19T11:27:21" hostname="dev-one" time="0.04">
-  <properties/>
-  <testcase name="different transcripts almost always differ()" classname="net.tenbo.hubble.core.crypto.SasTest" time="0.009"/>
-  <testcase name="produces five emoji()" classname="net.tenbo.hubble.core.crypto.SasTest" time="0.008"/>
-  <testcase name="same transcript yields same emoji on both sides()" classname="net.tenbo.hubble.core.crypto.SasTest" time="0.002"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

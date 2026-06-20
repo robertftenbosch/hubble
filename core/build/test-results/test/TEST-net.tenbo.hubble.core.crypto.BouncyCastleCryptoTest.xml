@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="net.tenbo.hubble.core.crypto.BouncyCastleCryptoTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-06-19T11:27:20" hostname="dev-one" time="0.858">
-  <properties/>
-  <testcase name="ed25519 sign and verify round-trips()" classname="net.tenbo.hubble.core.crypto.BouncyCastleCryptoTest" time="0.803"/>
-  <testcase name="hkdf is deterministic and length-correct()" classname="net.tenbo.hubble.core.crypto.BouncyCastleCryptoTest" time="0.039"/>
-  <testcase name="x25519 ecdh yields the same shared secret for both parties()" classname="net.tenbo.hubble.core.crypto.BouncyCastleCryptoTest" time="0.01"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
