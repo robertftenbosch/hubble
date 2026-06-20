@@ -303,7 +303,7 @@ triggers the OTP shutdown so GenServers get a chance to drain.
 ### Caddy
 `/etc/caddy/Caddyfile`:
 ```
-hubble.yourdomain.com {
+hubble.tenbo.app {
 	encode zstd gzip
 	reverse_proxy 127.0.0.1:4000
 }
@@ -320,14 +320,14 @@ be the edge.
 
 ### Client switch
 Once HTTPS is live, point the clients at the real host and drop cleartext:
-- `app/.../net/HubbleApi.kt` → `baseUrl = "https://hubble.yourdomain.com"`
+- `app/.../net/HubbleApi.kt` → `baseUrl = "https://hubble.tenbo.app"`
 - `app/src/main/AndroidManifest.xml` → remove `android:usesCleartextTraffic="true"`
 - `desktop/.../HubbleClient.kt` and anywhere else hardcoding `http://127.0.0.1:4000` → same.
 Then ship: `./gradlew :app:assembleRelease` and `./gradlew :desktop:packageDistributionForCurrentOS`.
 
 ### Verify
 ```bash
-curl -s https://hubble.yourdomain.com/health        # {"ok":true}
+curl -s https://hubble.tenbo.app/health        # {"ok":true}
 journalctl -u hubble -n 20 | grep mailbox            # only "/mailbox/_", never a raw id
 ```
 
