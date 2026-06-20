@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,6 +49,12 @@ class HubbleClient(private val scope: CoroutineScope) {
     var messages by mutableStateOf<List<ChatLine>>(emptyList()); private set
     var status by mutableStateOf("Not connected"); private set
     var restoreError by mutableStateOf<String?>(null); private set
+    // Active pairing flow: the QR payload to display, the current status line, and an
+    // internal job we can cancel from the UI. Null QR = no pairing in progress.
+    var pairingQr by mutableStateOf<String?>(null); private set
+    var pairingStatus by mutableStateOf("Waiting for your phone to scan…"); private set
+    private var pairingJob: Job? = null
+    private var pairingState: net.tenbo.hubble.core.pair.DesktopPairingState? = null
     var showMap by mutableStateOf(false); private set
     var heat by mutableStateOf<List<HeatCell>>(emptyList()); private set
     var toast by mutableStateOf<Toast?>(null); private set
@@ -87,6 +94,55 @@ class HubbleClient(private val scope: CoroutineScope) {
     }
 
     fun signOut() { Store.clear(); identity = null; matches = emptyList(); current = null; status = "Not connected" }
+
+    /**
+     * Start a "pair from phone" flow: mint an ephemeral keypair, surface a QR for the
+     * phone to scan, and poll the resulting opaque mailbox for the encrypted phrase.
+     * Auto-cancels after 90 s without a response. Caller cancels with [cancelPairing].
+     */
+    fun startPairing() {
+        cancelPairing()
+        restoreError = null
+        val pairing = net.tenbo.hubble.core.pair.Pairing(crypto)
+        val state = pairing.desktopStart()
+        pairingState = state
+        pairingQr = state.qrPayload
+        pairingStatus = "Waiting for your phone to scan…"
+        pairingJob = scope.launch {
+            withContext(Dispatchers.IO) {
+                val deadline = System.currentTimeMillis() + 90_000
+                while (System.currentTimeMillis() < deadline) {
+                    val blobs = runCatching { api.collect(state.mailboxId) }.getOrDefault(emptyList())
+                    val envelope = blobs.firstOrNull()
+                    if (envelope != null) {
+                        runCatching { pairing.desktopOpen(state, envelope) }
+                            .onSuccess { phrase ->
+                                pairingStatus = "Paired — restoring identity…"
+                                withContext(Dispatchers.Main) { finishPairing(phrase) }
+                                return@withContext
+                            }
+                            .onFailure { pairingStatus = "Couldn't decrypt — try again." }
+                    }
+                    delay(1_500)
+                }
+                if (pairingQr != null) {
+                    pairingStatus = "Timed out. Tap Pair to try again."
+                    pairingJob = null
+                }
+            }
+        }
+    }
+
+    fun cancelPairing() {
+        pairingJob?.cancel(); pairingJob = null
+        pairingQr = null; pairingState = null
+        pairingStatus = "Waiting for your phone to scan…"
+    }
+
+    private fun finishPairing(phrase: String) {
+        pairingQr = null; pairingState = null; pairingJob = null
+        restore(phrase)
+    }
 
     /** Pull the matches the phone shared via the encrypted self-mailbox. */
     fun sync() {

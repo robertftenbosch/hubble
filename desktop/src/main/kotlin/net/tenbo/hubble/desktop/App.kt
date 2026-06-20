@@ -60,33 +60,57 @@ private fun RestoreScreen(client: HubbleClient) {
         Spacer(Modifier.height(16.dp))
         Text("Sign in on this computer", style = MaterialTheme.typography.displayMedium, color = Ink)
         Spacer(Modifier.height(16.dp))
-        Text(
-            "Enter your twelve-word recovery phrase from the Hubble app on your phone. " +
-                "It restores the same identity here — your matches and chats follow.",
-            style = MaterialTheme.typography.bodyLarge, color = Ash,
-        )
-        Spacer(Modifier.height(28.dp))
-        Box(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(PaperSunk)
-                .border(1.dp, Line, RoundedCornerShape(10.dp)).padding(18.dp),
-        ) {
-            BasicTextField(
-                value = phrase,
-                onValueChange = { phrase = it },
-                textStyle = MonoLabel.copy(fontSize = 15.sp, letterSpacing = 0.5.sp, color = Ink),
-                cursorBrush = SolidColor(Signal),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (phrase.isEmpty()) Text("abandon ability able …", style = MonoLabel.copy(fontSize = 15.sp), color = Ash)
-                    inner()
-                },
+
+        val pairingQr = client.pairingQr
+        if (pairingQr != null) {
+            // Pair-from-phone mode: show the QR, no typing needed.
+            Text(
+                "Open Hubble on your phone, tap You → Pair desktop, and scan this code.",
+                style = MaterialTheme.typography.bodyLarge, color = Ash,
             )
+            Spacer(Modifier.height(20.dp))
+            Box(
+                Modifier.width(280.dp).background(Paper).border(1.dp, Line).padding(12.dp),
+            ) {
+                PairingQrCanvas(pairingQr, Modifier.fillMaxWidth().aspectRatio(1f))
+            }
+            Spacer(Modifier.height(14.dp))
+            Eyebrow(client.pairingStatus)
+            Spacer(Modifier.height(20.dp))
+            GhostButton("Cancel") { client.cancelPairing() }
+        } else {
+            // Fallback: type the recovery phrase.
+            Text(
+                "Enter your twelve-word recovery phrase from the Hubble app on your phone, " +
+                    "or pair without typing by scanning a QR with the app.",
+                style = MaterialTheme.typography.bodyLarge, color = Ash,
+            )
+            Spacer(Modifier.height(28.dp))
+            Box(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(PaperSunk)
+                    .border(1.dp, Line, RoundedCornerShape(10.dp)).padding(18.dp),
+            ) {
+                BasicTextField(
+                    value = phrase,
+                    onValueChange = { phrase = it },
+                    textStyle = MonoLabel.copy(fontSize = 15.sp, letterSpacing = 0.5.sp, color = Ink),
+                    cursorBrush = SolidColor(Signal),
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { inner ->
+                        if (phrase.isEmpty()) Text("abandon ability able …", style = MonoLabel.copy(fontSize = 15.sp), color = Ash)
+                        inner()
+                    },
+                )
+            }
+            client.restoreError?.let {
+                Spacer(Modifier.height(10.dp)); Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+            }
+            Spacer(Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                SignalButton("Restore my identity", enabled = phrase.isNotBlank()) { client.restore(phrase) }
+                GhostButton("Pair from phone") { client.startPairing() }
+            }
         }
-        client.restoreError?.let {
-            Spacer(Modifier.height(10.dp)); Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
-        }
-        Spacer(Modifier.height(20.dp))
-        SignalButton("Restore my identity", enabled = phrase.isNotBlank()) { client.restore(phrase) }
     }
 }
 

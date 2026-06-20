@@ -13,6 +13,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.1")
     implementation("org.json:json:20240303")
+    // QR rendering for "pair from phone" — desktop shows, phone scans.
+    implementation("com.google.zxing:core:3.5.3")
 }
 
 java {
