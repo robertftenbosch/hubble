@@ -106,10 +106,9 @@ private fun RestoreScreen(client: HubbleClient) {
                 Spacer(Modifier.height(10.dp)); Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
             }
             Spacer(Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                SignalButton("Restore my identity", enabled = phrase.isNotBlank()) { client.restore(phrase) }
-                GhostButton("Pair from phone") { client.startPairing() }
-            }
+            SignalButton("Restore my identity", enabled = phrase.isNotBlank()) { client.restore(phrase) }
+            Spacer(Modifier.height(10.dp))
+            GhostButton("Pair from phone instead") { client.startPairing() }
         }
     }
 }
