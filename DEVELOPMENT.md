@@ -341,11 +341,13 @@ each artifact on the matching target.
 
 ### Build the `.msi` on a Windows laptop
 1. Install **Temurin JDK 17** (full JDK, not a JRE) and **Git** on the laptop.
-2. Clone the repo and run the package task with the Windows wrapper:
-   ```cmd
+2. Clone the repo and run the package task with the Windows wrapper. From **PowerShell**
+   (the default on modern Windows) the script needs the explicit `.\` prefix; in `cmd.exe`
+   the bare form works:
+   ```powershell
    git clone https://github.com/robertftenbosch/hubble.git
    cd hubble
-   gradlew.bat :desktop:packageDistributionForCurrentOS
+   .\gradlew.bat :desktop:packageDistributionForCurrentOS
    ```
 3. The artifact lands at `desktop\build\compose\binaries\main\msi\Hubble-1.0.0.msi`.
    Double-click to install; Hubble lands under `%LocalAppData%\Hubble`.
