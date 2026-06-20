@@ -349,8 +349,20 @@ each artifact on the matching target.
    cd hubble
    .\gradlew.bat :desktop:packageDistributionForCurrentOS
    ```
-3. The artifact lands at `desktop\build\compose\binaries\main\msi\Hubble-1.0.0.msi`.
-   Double-click to install; Hubble lands under `%LocalAppData%\Hubble`.
+3. The artifact lands at `desktop\build\compose\binaries\main\msi\Hubble-X.Y.N.msi`
+   where N is the total commit count (`git rev-list --count HEAD`). Pick the freshest
+   without typing the version by hand:
+   ```powershell
+   Start-Process (Get-ChildItem desktop\build\compose\binaries\main\msi\Hubble-*.msi |
+                   Sort-Object Name -Descending | Select-Object -First 1).FullName
+   ```
+4. **No manual uninstall needed for updates.** Because the installer version strictly
+   increases per commit (root `build.gradle.kts` auto-derives it from git), Windows
+   Installer treats every fresh `.msi` as an upgrade. After `git pull` + rebuild, just
+   double-click the new `Hubble-X.Y.N.msi` — the previous Hubble is replaced in place,
+   your `HUBBLE_SERVER` env var stays, your `~/.hubble/` state stays. Confirm the new
+   version is live with the bottom-of-screen "Hubble 0.1.0-alpha.N+SHA" line, or
+   `(Get-Package Hubble).Version`.
 
 macOS (`.dmg`) and a second Linux box (`.deb`) follow the same pattern with `./gradlew`.
 
@@ -382,9 +394,12 @@ PORT=4000 RELEASE_COOKIE=$(openssl rand -hex 16) \
   _build/prod/rel/hubble/bin/hubble daemon
 curl -s http://192.168.2.8:4000/health   # smoke test from this box
 
-# on the Windows laptop, after installing Hubble-1.0.0.msi
+# on the Windows laptop, after installing the latest Hubble-X.Y.N.msi
 setx HUBBLE_SERVER http://192.168.2.8:4000
-# re-open Hubble; "Status" → green dot means the relay is reachable
+# re-open Hubble; "Status" → green dot means the relay is reachable.
+# Verify versions line up:
+#   curl -s http://192.168.2.8:4000/health     # {"ok":true,"version":"0.1.0-alpha.N"}
+# and the bottom of Hubble's sign-in screen shows the same alpha.N (with +SHA).
 ```
 
 This is plain HTTP, fine for a LAN trust boundary. Once the real Linode/Hetzner host is up
