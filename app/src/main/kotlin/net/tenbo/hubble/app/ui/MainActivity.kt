@@ -1,8 +1,11 @@
 package net.tenbo.hubble.app.ui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -151,7 +154,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        Screen.PROFILE ->
+                        Screen.PROFILE -> {
+                            val ctx = LocalContext.current
+                            val pairingStatus by vm.pairingStatus.collectAsState()
+                            val pairLauncher = rememberLauncherForActivityResult(
+                                com.journeyapps.barcodescanner.ScanContract(),
+                            ) { result ->
+                                result.contents?.let { vm.pairDesktop(it) }
+                            }
+                            LaunchedEffect(pairingStatus) {
+                                pairingStatus?.let {
+                                    Toast.makeText(ctx, it, Toast.LENGTH_LONG).show()
+                                    vm.dismissPairingStatus()
+                                }
+                            }
                             ProfileScreen(
                                 profile = vm.currentProfile(),
                                 crossedPaths = 0,
@@ -159,8 +175,18 @@ class MainActivity : ComponentActivity() {
                                 onEdit = { vm.goTo(Screen.PROFILE_EDIT) },
                                 onStories = { vm.goTo(Screen.FEED) },
                                 onSyncDevices = { vm.syncToMyDevices() },
+                                onPairDesktop = {
+                                    val opts = com.journeyapps.barcodescanner.ScanOptions().apply {
+                                        setBeepEnabled(false)
+                                        setOrientationLocked(false)
+                                        setPrompt("Scan the desktop's pairing QR")
+                                        setDesiredBarcodeFormats(com.journeyapps.barcodescanner.ScanOptions.QR_CODE)
+                                    }
+                                    pairLauncher.launch(opts)
+                                },
                                 onBack = { vm.goTo(Screen.DISCOVERY) },
                             )
+                        }
 
                         Screen.PROFILE_EDIT ->
                             ProfileEditScreen(initial = vm.currentProfile()) { vm.saveProfile(it) }

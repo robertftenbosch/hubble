@@ -30,6 +30,11 @@
     <!-- Recording voice messages -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Camera for scanning the desktop's pairing QR ("Pair desktop" in You). Optional
+         feature so installation isn't gated on devices that happen to lack a camera. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:allowBackup="false"
         android:label="Hubble"

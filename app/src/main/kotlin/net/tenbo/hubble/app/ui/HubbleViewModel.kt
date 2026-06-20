@@ -419,6 +419,41 @@ class HubbleViewModel(
 
     fun dismissMatch() { _justMatched.value = null }
 
+    /** Transient banner for the pair-desktop flow ("Paired", "QR not recognized", etc.). */
+    private val _pairingStatus = MutableStateFlow<String?>(null)
+    val pairingStatus: StateFlow<String?> = _pairingStatus.asStateFlow()
+
+    fun dismissPairingStatus() { _pairingStatus.value = null }
+
+    /**
+     * Pair a freshly-installed desktop client by scanning the QR it shows. We read the
+     * desktop's ephemeral pubkey from the QR, derive a one-shot symmetric key via ECDH,
+     * encrypt our recovery phrase under it, and deposit the envelope in the desktop-derived
+     * mailbox. The desktop polls that mailbox, decrypts, and restores the same identity.
+     * Then it self-syncs and pulls our matches.
+     */
+    fun pairDesktop(qrPayload: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val phrase = vault.loadPhrase()
+            if (phrase == null) {
+                _pairingStatus.value = "No phrase yet — finish onboarding first."
+                return@launch
+            }
+            val sealed = runCatching {
+                net.tenbo.hubble.core.pair.Pairing(crypto).phoneSeal(qrPayload, phrase)
+            }.getOrElse {
+                _pairingStatus.value = "That QR isn't a Hubble pairing code."
+                return@launch
+            }
+            runCatching { api.deposit(sealed.mailboxId, sealed.envelope) }
+                .onSuccess { _pairingStatus.value = "Paired — your computer is now signed in." }
+                .onFailure {
+                    Log.w(tag, "pair deposit failed: ${it.message}")
+                    _pairingStatus.value = "Couldn't reach the relay — check your connection."
+                }
+        }
+    }
+
     /** Publish your matches to the encrypted self-mailbox so your other devices (desktop) can pull them. */
     fun syncToMyDevices() {
         viewModelScope.launch(Dispatchers.IO) {

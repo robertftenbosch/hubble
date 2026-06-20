@@ -60,4 +60,7 @@ dependencies {
 
     // Background polling for notifications (no FCM / Google push)
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    // QR scanner — for pairing the desktop client with this phone's identity.
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }

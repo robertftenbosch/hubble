@@ -221,7 +221,7 @@ private fun ProfileBuildStep(
 
 /** A profile in the editorial layout. [crossedPaths] drives the coordinate stamp. */
 @Composable
-fun ProfileScreen(profile: Profile, crossedPaths: Int, isSelf: Boolean, onEdit: () -> Unit, onStories: () -> Unit, onSyncDevices: () -> Unit, onBack: () -> Unit) {
+fun ProfileScreen(profile: Profile, crossedPaths: Int, isSelf: Boolean, onEdit: () -> Unit, onStories: () -> Unit, onSyncDevices: () -> Unit, onPairDesktop: () -> Unit = {}, onBack: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(horizontal = 28.dp).padding(top = 56.dp, bottom = 28.dp),
@@ -277,6 +277,8 @@ fun ProfileScreen(profile: Profile, crossedPaths: Int, isSelf: Boolean, onEdit: 
             Text("Use Hubble on your computer too — your matches and chats follow.", style = MaterialTheme.typography.bodyMedium, color = Ash)
             Spacer(Modifier.height(12.dp))
             SignalButton("Sync to my computer", onClick = onSyncDevices)
+            Spacer(Modifier.height(10.dp))
+            SignalButton("Pair a new computer (scan QR)", onClick = onPairDesktop)
         }
     }
 }
