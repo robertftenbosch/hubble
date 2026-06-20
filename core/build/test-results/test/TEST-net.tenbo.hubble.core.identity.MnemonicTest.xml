@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="net.tenbo.hubble.core.identity.MnemonicTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-06-19T11:27:22" hostname="dev-one" time="0.051">
+  <properties/>
+  <testcase name="known BIP39 test vector matches the spec()" classname="net.tenbo.hubble.core.identity.MnemonicTest" time="0.012"/>
+  <testcase name="same entropy yields same phrase yields same seed()" classname="net.tenbo.hubble.core.identity.MnemonicTest" time="0.017"/>
+  <testcase name="generated phrase has 12 words and validates()" classname="net.tenbo.hubble.core.identity.MnemonicTest" time="0.011"/>
+  <testcase name="tampered phrase fails validation()" classname="net.tenbo.hubble.core.identity.MnemonicTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

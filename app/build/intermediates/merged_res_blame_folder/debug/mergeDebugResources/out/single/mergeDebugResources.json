@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "net.tenbo.hubble.app-debug-59:/font_spectral_regular.ttf.flat",
+        "source": "net.tenbo.hubble.app-main-61:/font/spectral_regular.ttf"
+    },
+    {
+        "merged": "net.tenbo.hubble.app-debug-59:/font_spectral_medium.ttf.flat",
+        "source": "net.tenbo.hubble.app-main-61:/font/spectral_medium.ttf"
+    },
+    {
+        "merged": "net.tenbo.hubble.app-debug-59:/font_ibm_plex_mono_medium.ttf.flat",
+        "source": "net.tenbo.hubble.app-main-61:/font/ibm_plex_mono_medium.ttf"
+    },
+    {
+        "merged": "net.tenbo.hubble.app-debug-59:/font_ibm_plex_mono_regular.ttf.flat",
+        "source": "net.tenbo.hubble.app-main-61:/font/ibm_plex_mono_regular.ttf"
+    },
+    {
+        "merged": "net.tenbo.hubble.app-debug-59:/font_spectral_semibold.ttf.flat",
+        "source": "net.tenbo.hubble.app-main-61:/font/spectral_semibold.ttf"
+    }
+]
