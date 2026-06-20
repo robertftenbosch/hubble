@@ -279,6 +279,8 @@ fun ProfileScreen(profile: Profile, crossedPaths: Int, isSelf: Boolean, onEdit: 
             SignalButton("Sync to my computer", onClick = onSyncDevices)
             Spacer(Modifier.height(10.dp))
             SignalButton("Pair a new computer (scan QR)", onClick = onPairDesktop)
+            Spacer(Modifier.height(20.dp))
+            Eyebrow("Hubble ${net.tenbo.hubble.app.BuildConfig.VERSION_NAME}")
         }
     }
 }

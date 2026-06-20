@@ -12,7 +12,10 @@ defmodule Hubble.Api.RouterTest do
   test "GET /health" do
     conn = call(conn(:get, "/health"))
     assert conn.status == 200
-    assert Jason.decode!(conn.resp_body) == %{"ok" => true}
+    body = Jason.decode!(conn.resp_body)
+    assert body["ok"] == true
+    # Version is auto-derived from /VERSION + git in mix.exs; just assert it surfaces.
+    assert is_binary(body["version"]) and body["version"] != ""
   end
 
   test "beacons feed the heatmap (k-anonymity respected)" do

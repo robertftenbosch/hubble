@@ -110,6 +110,11 @@ private fun RestoreScreen(client: HubbleClient) {
             Spacer(Modifier.height(10.dp))
             GhostButton("Pair from phone instead") { client.startPairing() }
         }
+        Spacer(Modifier.height(28.dp))
+        Text(
+            "Hubble ${BuildVersion.SEMVER}",
+            style = MonoLabel.copy(fontSize = 10.sp), color = Ash,
+        )
     }
 }
 

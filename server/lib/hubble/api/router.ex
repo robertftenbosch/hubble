@@ -19,7 +19,8 @@ defmodule Hubble.Api.Router do
   plug(:dispatch)
 
   get "/health" do
-    send_json(conn, 200, %{ok: true})
+    version = Application.spec(:hubble, :vsn) |> to_string()
+    send_json(conn, 200, %{ok: true, version: version})
   end
 
   # WebRTC signaling: upgrade to a WebSocket bound to this peer's id.

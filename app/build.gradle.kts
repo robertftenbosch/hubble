@@ -15,11 +15,12 @@ android {
         applicationId = "net.tenbo.hubble"
         minSdk = 26 // BLE advertise/peripheral reliable from API 26+
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // Auto-derived from git in root build.gradle.kts.
+        versionCode = rootProject.extra["versionCode"] as Int
+        versionName = rootProject.extra["versionSemver"] as String
     }
 
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
