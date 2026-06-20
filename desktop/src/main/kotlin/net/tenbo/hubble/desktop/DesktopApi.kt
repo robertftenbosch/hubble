@@ -10,8 +10,17 @@ import java.util.Base64
 
 data class HeatCell(val cell: String, val count: Int)
 
-/** Desktop HTTP client for the Hubble relay/heatmap — same endpoints as the phone. */
-class DesktopApi(private val baseUrl: String = "http://127.0.0.1:4000") {
+/**
+ * Desktop HTTP client for the Hubble relay/heatmap — same endpoints as the phone.
+ *
+ * The default server URL can be overridden at launch time with the `HUBBLE_SERVER`
+ * environment variable. Useful for pointing an installed copy at a LAN test server or a
+ * production host without rebuilding (e.g. `setx HUBBLE_SERVER http://192.168.x.y:4000`
+ * on Windows, or an `Environment=` line in a Linux .desktop launcher).
+ */
+class DesktopApi(
+    private val baseUrl: String = System.getenv("HUBBLE_SERVER") ?: "http://127.0.0.1:4000",
+) {
     private val http = HttpClient.newHttpClient()
     private val b64 = Base64.getEncoder()
     private val unb64 = Base64.getDecoder()

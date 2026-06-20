@@ -333,7 +333,64 @@ journalctl -u hubble -n 20 | grep mailbox            # only "/mailbox/_", never 
 
 ---
 
-## 11. Roadmap (open work)
+## 11. Installing the desktop client on another machine
+
+The desktop installer (`.msi` / `.dmg` / `.deb`) is built with JPackage, which does **not**
+cross-compile — the installer for a given OS has to be built **on** that OS. Plan to build
+each artifact on the matching target.
+
+### Build the `.msi` on a Windows laptop
+1. Install **Temurin JDK 17** (full JDK, not a JRE) and **Git** on the laptop.
+2. Clone the repo and run the package task with the Windows wrapper:
+   ```cmd
+   git clone https://github.com/robertftenbosch/hubble.git
+   cd hubble
+   gradlew.bat :desktop:packageDistributionForCurrentOS
+   ```
+3. The artifact lands at `desktop\build\compose\binaries\main\msi\Hubble-1.0.0.msi`.
+   Double-click to install; Hubble lands under `%LocalAppData%\Hubble`.
+
+macOS (`.dmg`) and a second Linux box (`.deb`) follow the same pattern with `./gradlew`.
+
+### Pointing an installed copy at a different server
+`DesktopApi` defaults to `http://127.0.0.1:4000` but honors the `HUBBLE_SERVER` env var, so a
+single build can target dev / a LAN test box / production without rebuilding.
+
+**Windows** — persistent env var, then re-open Hubble:
+```cmd
+setx HUBBLE_SERVER http://192.168.2.8:4000
+```
+(`setx` writes the user environment; close and re-open any shells/launchers before starting
+Hubble, otherwise it sees the old value.)
+
+**Linux** — either `export HUBBLE_SERVER=...` in the launching shell, or add
+`Environment=HUBBLE_SERVER=...` to the `.desktop` launcher's `[Desktop Entry]` section.
+
+**macOS** — `launchctl setenv HUBBLE_SERVER http://…` (process-wide), or put it in the
+shell rc you launch from.
+
+### Local end-to-end with the beast box as the test server
+Running this dev machine (`192.168.2.8`) as a local relay so a Windows laptop can talk to
+it over the LAN:
+```bash
+# on the dev box — production-style release as a background daemon
+cd server
+MIX_ENV=prod mix release             # one-time per code change
+PORT=4000 RELEASE_COOKIE=$(openssl rand -hex 16) \
+  _build/prod/rel/hubble/bin/hubble daemon
+curl -s http://192.168.2.8:4000/health   # smoke test from this box
+
+# on the Windows laptop, after installing Hubble-1.0.0.msi
+setx HUBBLE_SERVER http://192.168.2.8:4000
+# re-open Hubble; "Status" → green dot means the relay is reachable
+```
+
+This is plain HTTP, fine for a LAN trust boundary. Once the real Linode/Hetzner host is up
+(§10), point `HUBBLE_SERVER` at `https://hubble.tenbo.app` instead — same MSI, no rebuild.
+
+---
+
+## 12. Roadmap (open work)
 
 ### Done (recent)
 - Dating pivot (hybrid): discovery → like → match → chat, editorial design system.
