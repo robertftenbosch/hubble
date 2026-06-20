@@ -304,8 +304,8 @@ triggers the OTP shutdown so GenServers get a chance to drain.
 `/etc/caddy/Caddyfile`:
 ```
 hubble.yourdomain.com {
-    encode zstd gzip
-    reverse_proxy 127.0.0.1:4000
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:4000
 }
 ```
 Caddy auto-acquires the certificate, redirects 80 → 443, and proxies WebSockets
