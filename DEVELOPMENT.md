@@ -225,7 +225,115 @@ jewel — Keystore-encrypted on Android, owner-only (`0600`) on desktop (OS-keyc
 
 ---
 
-## 10. Roadmap (open work)
+## 10. Deploying the server to production
+
+**Stack: `mix release` on any small Linux VPS (Hetzner / Linode / OVH / Scaleway all fine) +
+systemd to keep it alive + Caddy in front for TLS.** The server has no database and no
+third-party services; a €5/month box is overprovisioned. For EU jurisdiction Hetzner is the
+default pick; for the same shape elsewhere Linode is fine.
+
+### Design choice: state stays in RAM
+Heatmap counts and relay envelopes live in `GenServer` process state — a restart wipes
+everything. That is intentional. The privacy invariant from §6 says the server can never
+read content or locate an individual; persistence would create a forensic surface. The same
+mailbox id hitting the same client repeatedly is enough to fingerprint a friendship without
+decrypting anything, and you'd be persisting exactly that pattern. The cost of staying RAM-
+only is small: envelopes deposited during the ~1 s restart window are lost (sender has
+already discarded them, receiver hasn't polled yet). Push releases off-peak; if the loss
+ever bites in practice the fix is client-side retry, not server-side persistence.
+
+(Aside: if you ever do need to persist — e.g. moving from one relay node to several behind
+a load balancer — start with **DETS** for the relay only, one Erlang call, no schema, no
+migrations. Mnesia is *bundled* with OTP, not *simple*: schema setup, `disc_copies` vs
+`ram_copies`, dump intervals, net-split recovery. Don't reach for it before you have to.)
+
+### Server prep (once)
+- VPS with inbound 22 (SSH), 80 (Let's Encrypt challenge), 443 (HTTPS) open. Nothing else.
+- Erlang/OTP 27 + Elixir 1.17 (only to **build** the release; the tarball ships its own OTP,
+  so you can also build elsewhere and `scp` the `_build/prod/rel/hubble` tree).
+- `apt install caddy` — TLS via automatic Let's Encrypt, transparent WebSocket reverse proxy.
+- `useradd --system --shell /usr/sbin/nologin --home-dir /opt/hubble hubble`.
+- `git clone` the repo to `/opt/hubble`. Server lives in `/opt/hubble/server`.
+
+### Runtime config
+`config/config.exs` is compile-time and fine for dev/test. For a release add
+`config/runtime.exs` so `PORT` is read at boot, not frozen at build time:
+```elixir
+# server/config/runtime.exs
+import Config
+if config_env() == :prod do
+  config :hubble, :port, String.to_integer(System.get_env("PORT") || "4000")
+end
+```
+(Already present in this repo.)
+
+### Build the release
+```bash
+cd /opt/hubble/server
+MIX_ENV=prod mix deps.get
+MIX_ENV=prod mix release
+# -> _build/prod/rel/hubble/bin/hubble
+```
+
+### systemd
+`/etc/systemd/system/hubble.service`:
+```ini
+[Unit]
+Description=Hubble discovery + relay server
+After=network.target
+
+[Service]
+Type=simple
+User=hubble
+WorkingDirectory=/opt/hubble/server
+Environment=PORT=4000
+Environment=RELEASE_COOKIE=<long-random-string>
+Environment=LANG=en_US.UTF-8
+ExecStart=/opt/hubble/server/_build/prod/rel/hubble/bin/hubble start
+Restart=on-failure
+TimeoutStopSec=10
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+```
+`systemctl enable --now hubble`. Logs via `journalctl -u hubble -f`. SIGTERM from systemd
+triggers the OTP shutdown so GenServers get a chance to drain.
+
+### Caddy
+`/etc/caddy/Caddyfile`:
+```
+hubble.yourdomain.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:4000
+}
+```
+Caddy auto-acquires the certificate, redirects 80 → 443, and proxies WebSockets
+(`/signal/:id`) transparently. `systemctl reload caddy`.
+
+### Don't put a CDN in front of Caddy
+The router uses `Hubble.Api.SafeLogger` (not `Plug.Logger`); it collapses `/mailbox/:id` and
+`/signal/:id` to `/mailbox/_` and `/signal/_` before they reach the log line — so the access
+log can never link an IP to a mailbox id. **A Cloudflare or any other TLS-terminating proxy
+in front of Caddy would defeat that** (its access log would see the raw paths). Caddy must
+be the edge.
+
+### Client switch
+Once HTTPS is live, point the clients at the real host and drop cleartext:
+- `app/.../net/HubbleApi.kt` → `baseUrl = "https://hubble.yourdomain.com"`
+- `app/src/main/AndroidManifest.xml` → remove `android:usesCleartextTraffic="true"`
+- `desktop/.../HubbleClient.kt` and anywhere else hardcoding `http://127.0.0.1:4000` → same.
+Then ship: `./gradlew :app:assembleRelease` and `./gradlew :desktop:packageDistributionForCurrentOS`.
+
+### Verify
+```bash
+curl -s https://hubble.yourdomain.com/health        # {"ok":true}
+journalctl -u hubble -n 20 | grep mailbox            # only "/mailbox/_", never a raw id
+```
+
+---
+
+## 11. Roadmap (open work)
 
 ### Done (recent)
 - Dating pivot (hybrid): discovery → like → match → chat, editorial design system.
