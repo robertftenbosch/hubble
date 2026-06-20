@@ -396,7 +396,7 @@ curl -s http://192.168.2.8:4000/health   # smoke test from this box
 
 # on the Windows laptop, after installing the latest Hubble-X.Y.N.msi
 setx HUBBLE_SERVER http://192.168.2.8:4000
-# re-open Hubble; "Status" → green dot means the relay is reachable.
+# re-open Hubble; "Status" → blue dot means the relay is reachable.
 # Verify versions line up:
 #   curl -s http://192.168.2.8:4000/health     # {"ok":true,"version":"0.1.0-alpha.N"}
 # and the bottom of Hubble's sign-in screen shows the same alpha.N (with +SHA).
