@@ -38,6 +38,11 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Hubble"
             packageVersion = "1.0.0"
+            // jlink strips everything not explicitly included; this list comes from
+            // `./gradlew :desktop:suggestRuntimeModules`. Without java.net.http the app
+            // crashes immediately ("Failed to launch JVM" → NoClassDefFoundError in
+            // DesktopApi).
+            modules("java.instrument", "java.naming", "java.net.http", "java.sql", "jdk.unsupported")
         }
     }
 }
