@@ -18,6 +18,12 @@ defmodule Hubble.Api.Router do
   plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
   plug(:dispatch)
 
+  get "/" do
+    conn
+    |> put_resp_content_type("text/html")
+    |> send_resp(200, Hubble.Api.LandingPage.html())
+  end
+
   get "/health" do
     version = Application.spec(:hubble, :vsn) |> to_string()
     send_json(conn, 200, %{ok: true, version: version})

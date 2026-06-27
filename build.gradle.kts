@@ -24,7 +24,7 @@ val versionBase = file("VERSION").readText().trim()
 val versionCount = runCatching {
     val p = ProcessBuilder("git", "rev-list", "--count", "HEAD").directory(rootDir).start()
     p.inputStream.bufferedReader().readText().trim().toInt().also { p.waitFor() }
-}.getOrDefault(0)
+}.getOrDefault(0).coerceAtLeast(1)
 val versionHash = runCatching {
     val p = ProcessBuilder("git", "rev-parse", "--short", "HEAD").directory(rootDir).start()
     p.inputStream.bufferedReader().readText().trim().ifEmpty { "unknown" }.also { p.waitFor() }

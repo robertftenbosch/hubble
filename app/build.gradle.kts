@@ -25,7 +25,8 @@ android {
         //   ./gradlew :app:assembleRelease -PhubbleServer=https://hubble.tenbo.app
         val hubbleServer = (project.findProperty("hubbleServer") as String?)
             ?: "http://127.0.0.1:4000"
-        buildConfigField("String", "HUBBLE_SERVER", "\"$hubbleServer\"")
+        val hubbleServerEscaped = hubbleServer.replace("\\", "\\\\").replace("\"", "\\\"")
+        buildConfigField("String", "HUBBLE_SERVER", "\"$hubbleServerEscaped\"")
     }
 
     buildFeatures { compose = true; buildConfig = true }

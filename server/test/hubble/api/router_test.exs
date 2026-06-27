@@ -9,6 +9,14 @@ defmodule Hubble.Api.RouterTest do
 
   defp call(conn), do: Hubble.Api.Router.call(conn, @opts)
 
+  test "GET / returns the landing page HTML" do
+    conn = call(conn(:get, "/"))
+    assert conn.status == 200
+    assert get_resp_header(conn, "content-type") |> hd() =~ "text/html"
+    assert conn.resp_body =~ "Hubble"
+    assert conn.resp_body =~ "/heatmap"
+  end
+
   test "GET /health" do
     conn = call(conn(:get, "/health"))
     assert conn.status == 200

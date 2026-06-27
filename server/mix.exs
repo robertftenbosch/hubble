@@ -10,16 +10,25 @@ defmodule Hubble.MixProject do
   # alpha counter from `git rev-list --count HEAD`. Same scheme as the Kotlin modules,
   # so phone/desktop/server can all be correlated to the same commit. SemVer-strict
   # form (no +sha) — Hex/SemVer don't allow build metadata in :version.
-  @version_base "../VERSION" |> Path.expand(__DIR__) |> File.read!() |> String.trim()
+  @version_base case File.read(Path.expand("../VERSION", __DIR__)) do
+                  {:ok, v} -> String.trim(v)
+                  _ -> "0.0.0"
+                end
   @commit_count (case System.cmd("git", ["rev-list", "--count", "HEAD"], stderr_to_stdout: true) do
                    {out, 0} -> String.trim(out)
                    _ -> "0"
                  end)
+  # Append the alpha counter only when the base is a pre-release (contains "-").
+  # A stable base like "1.0.0" must be used as-is; appending ".N" produces a
+  # 4-component string that Mix's strict SemVer parser rejects at compile time.
+  @version (if String.contains?(@version_base, "-"),
+              do: "#{@version_base}.#{@commit_count}",
+              else: @version_base)
 
   def project do
     [
       app: :hubble,
-      version: "#{@version_base}.#{@commit_count}",
+      version: @version,
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps()
