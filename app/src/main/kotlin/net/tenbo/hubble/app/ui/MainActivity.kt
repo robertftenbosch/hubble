@@ -18,6 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
@@ -110,17 +113,36 @@ class MainActivity : ComponentActivity() {
                         Screen.MAP -> {
                             val cells by vm.heatmap.collectAsState()
                             LaunchedEffect(Unit) { vm.loadHeatmap() }
+                            var hasLocation by remember {
+                                mutableStateOf(
+                                    applicationContext.checkSelfPermission(
+                                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED,
+                                )
+                            }
+                            var postAfterGrant by remember { mutableStateOf(false) }
                             val locationPermission = androidx.activity.compose.rememberLauncherForActivityResult(
                                 androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
-                            ) { granted -> if (granted) vm.postLocationBeacon() }
+                            ) { granted ->
+                                hasLocation = granted
+                                if (granted && postAfterGrant) vm.postLocationBeacon()
+                                postAfterGrant = false
+                            }
+                            // Ask on entering the map so it can open on the user's location.
+                            LaunchedEffect(Unit) {
+                                if (!hasLocation) {
+                                    locationPermission.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                                }
+                            }
                             MapScreen(
                                 cells = cells,
+                                locationGranted = hasLocation,
                                 onCheckIn = {
-                                    val granted = applicationContext.checkSelfPermission(
-                                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                                    if (granted) vm.postLocationBeacon()
-                                    else locationPermission.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                                    if (hasLocation) vm.postLocationBeacon()
+                                    else {
+                                        postAfterGrant = true
+                                        locationPermission.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                                    }
                                 },
                                 onBack = { vm.goTo(Screen.NEARBY) },
                             )

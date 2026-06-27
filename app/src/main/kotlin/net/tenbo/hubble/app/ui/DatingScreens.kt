@@ -391,7 +391,7 @@ private fun crossedStamp(place: String, lastSeenMs: Long, count: Int, nowMs: Lon
  * The server only knows k-anonymous cells, so no individual can ever be located here.
  */
 @Composable
-fun MapScreen(cells: List<net.tenbo.hubble.app.net.HeatCell>, onCheckIn: () -> Unit, onBack: () -> Unit) {
+fun MapScreen(cells: List<net.tenbo.hubble.app.net.HeatCell>, locationGranted: Boolean, onCheckIn: () -> Unit, onBack: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(horizontal = 28.dp).padding(top = 56.dp, bottom = 28.dp),
@@ -416,6 +416,7 @@ fun MapScreen(cells: List<net.tenbo.hubble.app.net.HeatCell>, onCheckIn: () -> U
 
         OsmHeatmap(
             cells = cells,
+            locationGranted = locationGranted,
             modifier = Modifier.fillMaxWidth().height(360.dp).clip(RoundedCornerShape(12.dp)),
         )
 
